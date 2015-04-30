@@ -20,6 +20,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides information for registering AngularJS project type into project wizard.
@@ -27,11 +29,11 @@ import javax.annotation.Nonnull;
  * @author Vitalii Parfonov
  */
 public class AngularJsProjectWizardRegistrar implements ProjectWizardRegistrar {
-    private final Array<Provider<? extends WizardPage<ImportProject>>> wizardPages;
+    private final List<Provider<? extends WizardPage<ImportProject>>> wizardPages;
 
     @Inject
     public AngularJsProjectWizardRegistrar() {
-        wizardPages = Collections.createArray();
+        wizardPages = new ArrayList<>();
     }
 
     @Nonnull
@@ -45,7 +47,7 @@ public class AngularJsProjectWizardRegistrar implements ProjectWizardRegistrar {
     }
 
     @Nonnull
-    public Array<Provider<? extends WizardPage<ImportProject>>> getWizardPages() {
+    public List<Provider<? extends WizardPage<ImportProject>>> getWizardPages() {
         return wizardPages;
     }
 }
