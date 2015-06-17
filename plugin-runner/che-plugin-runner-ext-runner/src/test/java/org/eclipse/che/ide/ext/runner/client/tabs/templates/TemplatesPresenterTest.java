@@ -64,6 +64,7 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
@@ -81,7 +82,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class TemplatesPresenterTest {
     private static final String DOCKER_TEMPLATE = "docker";
-    private static final String SOME_TEXT       = "someText";
+    private static final String SOME_TEXT       = "some Text";
 
     //constructor mocks
     @Mock
@@ -286,6 +287,7 @@ public class TemplatesPresenterTest {
         verify(panelState).getState();
         verify(runnerUtil).hasRunPermission();
         verify(runnerManagerView).setEnableRunButton(true);
+        verify(view, times(2)).scrollTop(anyInt());
     }
 
     @Test
@@ -525,27 +527,25 @@ public class TemplatesPresenterTest {
 
     @Test
     public void defaultEnvironmentShouldNotBeSetWhenDefaultRunnerIsNotChanged() throws Exception {
-        when(environment.getId()).thenReturn(SOME_TEXT);
+        when(environment.getId()).thenReturn("project:/runner");
 
         presenter.setDefaultEnvironment(environment);
 
         verify(appContext).getCurrentProject();
         verify(currentProject).getProjectDescription();
 
-        verify(descriptor, never()).getRunners();
         verify(runnersDescriptor, never()).setDefault(SOME_TEXT);
 
         verify(currentProject).getRunner();
         verify(defaultEnvWidget).update(environment);
         verify(environment).getId();
 
-        verify(view).setDefaultProjectWidget(defaultEnvWidget);
         verify(defaultEnvWidget).update(environment);
     }
 
     @Test
     public void defaultEnvironmentShouldNotBeSetWhenDefaultRunnerIsChanged() throws Exception {
-        when(environment.getId()).thenReturn("other");
+        when(environment.getId()).thenReturn("project:/runner");
 
         presenter.setDefaultEnvironment(environment);
 
@@ -553,7 +553,7 @@ public class TemplatesPresenterTest {
         verify(defaultEnvWidget).update(environment);
         verify(environment).getId();
         verify(descriptor).getRunners();
-        verify(runnersDescriptor).setDefault("other");
+        verify(runnersDescriptor).setDefault("project:/runner");
 
         updateProjectShouldBeVerified();
 
@@ -562,7 +562,7 @@ public class TemplatesPresenterTest {
 
     @Test
     public void defaultEnvironmentInfoShouldBeShownWhenDefaultEnvironmentIsNotNull() throws Exception {
-        when(environment.getId()).thenReturn(SOME_TEXT);
+        when(environment.getId()).thenReturn("project:/runner");
         presenter.setDefaultEnvironment(environment);
 
         presenter.onDefaultRunnerMouseOver();
@@ -572,7 +572,7 @@ public class TemplatesPresenterTest {
 
     @Test
     public void defaultEnvironmentInfoShouldBeShownWhenDefaultEnvironmentIsNull() throws Exception {
-        when(environment.getId()).thenReturn(SOME_TEXT);
+        when(environment.getId()).thenReturn("project:/runner");
         presenter.setDefaultEnvironment(null);
 
         presenter.onDefaultRunnerMouseOver();
