@@ -120,14 +120,14 @@ public class MachinePanelPresenterTest {
                                              eq(machine2),
                                              isNull(List.class))).thenReturn(machineNode2);
 
-        when(service.getMachines(null)).thenReturn(machinePromise);
+        when(service.getMachinesStates(null)).thenReturn(machinePromise);
     }
 
     @Test
     public void treeShouldBeDisplayedWithMachines() throws Exception {
         presenter.showMachines();
 
-        verify(service).getMachines(null);
+        verify(service).getMachinesStates(null);
 
         verify(machinePromise).then(operationCaptor.capture());
         operationCaptor.getValue().apply(Arrays.asList(machineDescriptor1, machineDescriptor2));

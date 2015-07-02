@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.MachineDescriptor;
+import org.eclipse.che.api.machine.shared.dto.MachineStateDescriptor;
 import org.eclipse.che.api.machine.shared.dto.ProcessDescriptor;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -69,7 +70,7 @@ public class MachineManager implements ProjectActionHandler {
     private final NotificationManager         notificationManager;
     private final MachineLocalizationConstant localizationConstant;
     private final WorkspaceAgent              workspaceAgent;
-    private final MachineStateNotifier        machineStateNotifier;
+    private final MachineStatusNotifier       machineStatusNotifier;
     private final DialogFactory               dialogFactory;
 
     /** Stores ID of the developer machine (where workspace or current project is bound). */
@@ -84,7 +85,7 @@ public class MachineManager implements ProjectActionHandler {
                           NotificationManager notificationManager,
                           MachineLocalizationConstant localizationConstant,
                           WorkspaceAgent workspaceAgent,
-                          MachineStateNotifier machineStateNotifier,
+                          MachineStatusNotifier machineStatusNotifier,
                           DialogFactory dialogFactory) {
         this.machineServiceClient = machineServiceClient;
         this.messageBus = messageBus;
@@ -94,18 +95,18 @@ public class MachineManager implements ProjectActionHandler {
         this.notificationManager = notificationManager;
         this.localizationConstant = localizationConstant;
         this.workspaceAgent = workspaceAgent;
-        this.machineStateNotifier = machineStateNotifier;
+        this.machineStatusNotifier = machineStatusNotifier;
         this.dialogFactory = dialogFactory;
     }
 
     @Override
     public void onProjectOpened(final ProjectActionEvent event) {
-        machineServiceClient.getMachines(null).then(new Operation<List<MachineDescriptor>>() {
+        machineServiceClient.getMachinesStates(null).then(new Operation<List<MachineStateDescriptor>>() {
             @Override
-            public void apply(List<MachineDescriptor> arg) throws OperationException {
-                for (MachineDescriptor machineDescriptor : arg) {
-                    if (machineDescriptor.isWorkspaceBound()) {
-                        devMachineId = machineDescriptor.getId();
+            public void apply(List<MachineStateDescriptor> arg) throws OperationException {
+                for (MachineStateDescriptor machineStateDescriptor : arg) {
+                    if (machineStateDescriptor.isWorkspaceBound()) {
+                        devMachineId = machineStateDescriptor.getId();
                         return;
                     }
                 }
@@ -151,10 +152,10 @@ public class MachineManager implements ProjectActionHandler {
         }).then(new Operation<MachineDescriptor>() {
             @Override
             public void apply(final MachineDescriptor machineDescriptor) throws OperationException {
-                MachineStateNotifier.RunningListener runningListener = null;
+                MachineStatusNotifier.RunningListener runningListener = null;
 
                 if (bindWorkspace) {
-                    runningListener = new MachineStateNotifier.RunningListener() {
+                    runningListener = new MachineStatusNotifier.RunningListener() {
                         @Override
                         public void onRunning() {
                             devMachineId = machineDescriptor.getId();
@@ -162,7 +163,7 @@ public class MachineManager implements ProjectActionHandler {
                     };
                 }
 
-                machineStateNotifier.trackMachine(machineDescriptor.getId(), runningListener);
+                machineStatusNotifier.trackMachine(machineDescriptor.getId(), runningListener);
             }
         });
     }
@@ -203,7 +204,7 @@ public class MachineManager implements ProjectActionHandler {
         machineServiceClient.destroyMachine(machineId).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
-                machineStateNotifier.trackMachine(machineId);
+                machineStatusNotifier.trackMachine(machineId);
                 if (devMachineId != null && machineId.equals(devMachineId)) {
                     devMachineId = null;
                 }

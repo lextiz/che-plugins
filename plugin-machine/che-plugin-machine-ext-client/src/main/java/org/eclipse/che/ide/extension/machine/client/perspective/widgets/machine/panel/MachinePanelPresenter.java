@@ -25,8 +25,8 @@ import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
+import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStatusEvent;
+import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStatusHandler;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
 
 import javax.annotation.Nonnull;
@@ -41,7 +41,7 @@ import java.util.List;
  * @author Artem Zatsarynnyy
  */
 @Singleton
-public class MachinePanelPresenter extends BasePresenter implements MachinePanelView.ActionDelegate, MachineStateHandler {
+public class MachinePanelPresenter extends BasePresenter implements MachinePanelView.ActionDelegate, MachineStatusHandler {
 
     private final MachinePanelView            view;
     private final MachineServiceClient        service;
@@ -70,7 +70,7 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
         this.machineList = new ArrayList<>();
 
-        eventBus.addHandler(MachineStateEvent.TYPE, this);
+        eventBus.addHandler(MachineStatusEvent.TYPE, this);
     }
 
     /** Gets all machines and adds them to special place on view. */
@@ -156,13 +156,13 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
     /** {@inheritDoc} */
     @Override
-    public void onMachineRunning(MachineStateEvent event) {
+    public void onMachineRunning(MachineStatusEvent event) {
         showMachines();
     }
 
     /** {@inheritDoc} */
     @Override
-    public void onMachineDestroyed(MachineStateEvent event) {
+    public void onMachineDestroyed(MachineStatusEvent event) {
         showMachines();
     }
 }
